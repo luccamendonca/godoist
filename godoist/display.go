@@ -2,9 +2,10 @@ package godoist
 
 import (
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/alecthomas/repr"
+	"github.com/gotk3/gotk3/gtk"
 	"github.com/ncruces/zenity"
 	"github.com/spf13/cobra"
 )
@@ -49,12 +50,53 @@ func (cli DisplayCLI) Debug(any interface{}) {
 
 // DisplayGUI
 func (gui DisplayGUI) Prompt(msg string) string {
-	resp, err := zenity.Entry(msg)
+	gtk.Init(nil)
+
+	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
-		zenity.Error(err.Error())
-		os.Exit(1)
+		log.Fatal("Unable to create window:", err)
 	}
-	return resp
+	win.SetTitle("Simple Example")
+
+	b, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 10)
+	if err != nil {
+		log.Fatal("Unable to create label:", err)
+	}
+
+	l, err := gtk.LabelNew("Hello, gotk3 2!")
+	if err != nil {
+		log.Fatal("Unable to create label:", err)
+	}
+
+	b.Add(l)
+
+	e, err := gtk.EntryNew()
+	if err != nil {
+		log.Fatal("Unable to create entry:", err)
+	}
+
+	b.Add(e)
+
+	win.Add(b)
+
+	win.SetDefaultSize(800, 600)
+	win.SetKeepAbove(true)
+	win.SetSkipTaskbarHint(true)
+
+	win.ShowAll()
+	win.Present()
+	win.GrabFocus()
+
+	// Begin executing the GTK main loop.  This blocks until
+	// gtk.MainQuit() is run.
+	gtk.Main()
+
+	// resp, err := zenity.Entry(msg)
+	// if err != nil {
+	// 	zenity.Error(err.Error())
+	// 	os.Exit(1)
+	// }
+	// return resp
 }
 func (gui DisplayGUI) Error(msg string) {
 	zenity.Error(msg)
