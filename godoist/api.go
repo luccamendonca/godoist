@@ -16,10 +16,17 @@ type Task struct {
 	ParentId  int    `json:"parent_id,string"`
 	ProjectId int    `json:"project_id,string"`
 	Url       string `json:"url"`
+	Due       *struct {
+		Date      string `json:"date"`
+		String    string `json:"string"`
+		Datetime  string `json:"datetime"`
+		Recurring bool   `json:"recurring"`
+	} `json:"due"`
 }
 
 type TaskRequest struct {
-	Content string `json:"content,omitempty"`
+	Content   string `json:"content,omitempty"`
+	DueString string `json:"due_string,omitempty"`
 }
 
 type Project struct {
@@ -74,7 +81,10 @@ func FetchTasksByProjectName(projectName string) ([]Task, error) {
 }
 
 func CreateTask(taskName string) (Task, error) {
-	taskRequest := TaskRequest{Content: taskName}
+	taskRequest := TaskRequest{
+		Content:   taskName,
+		DueString: "today",
+	}
 	reqBodyBuf, err := json.Marshal(taskRequest)
 	var task Task
 	if err != nil {
