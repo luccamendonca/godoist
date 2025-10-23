@@ -1,7 +1,6 @@
 package godoist
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,12 +39,12 @@ var addCmd = &cobra.Command{
 		}
 
 		taskName := display.PromptForTask(projectName)
-		task, err := CreateTaskInProject(taskName, projectName)
+		_, err := CreateTaskInProject(taskName, projectName)
 		if err != nil {
 			display.Error(err.Error())
 			os.Exit(1)
 		}
-		display.Info(fmt.Sprintf("Task created! Id: %d", task.Id))
+		// Task created successfully - exit silently
 	},
 }
 var useGUI bool = false
