@@ -11,6 +11,8 @@ import (
 
 type CobraDisplay interface {
 	Prompt(msg string) string
+	PromptWithDefault(msg string, defaultValue string) string
+	PromptForTask(projectName string) string
 	Error(msg string)
 	Info(msg string)
 	Debug(any interface{})
@@ -37,6 +39,15 @@ func NewCobraDisplay(cmd *cobra.Command, args []string) CobraDisplay {
 func (cli DisplayCLI) Prompt(msg string) string {
 	return cli.args[0]
 }
+func (cli DisplayCLI) PromptWithDefault(msg string, defaultValue string) string {
+	return defaultValue
+}
+func (cli DisplayCLI) PromptForTask(projectName string) string {
+	if len(cli.args) > 0 {
+		return cli.args[0]
+	}
+	return ""
+}
 func (cli DisplayCLI) Error(msg string) {
 	cli.Info(msg)
 }
@@ -51,8 +62,25 @@ func (cli DisplayCLI) Debug(any interface{}) {
 func (gui DisplayGUI) Prompt(msg string) string {
 	resp, err := zenity.Entry(msg)
 	if err != nil {
-		zenity.Error(err.Error())
-		os.Exit(1)
+		// User cancelled - exit silently
+		os.Exit(0)
+	}
+	return resp
+}
+func (gui DisplayGUI) PromptWithDefault(msg string, defaultValue string) string {
+	resp, err := zenity.Entry(msg, zenity.EntryText(defaultValue))
+	if err != nil {
+		// User cancelled - exit silently
+		os.Exit(0)
+	}
+	return resp
+}
+func (gui DisplayGUI) PromptForTask(projectName string) string {
+	msg := fmt.Sprintf("Task name (Project: %s)", projectName)
+	resp, err := zenity.Entry(msg)
+	if err != nil {
+		// User cancelled - exit silently
+		os.Exit(0)
 	}
 	return resp
 }

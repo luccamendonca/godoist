@@ -28,12 +28,19 @@ var listCmd = &cobra.Command{
 }
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Adds a new task, given a task name. Creates on Inbox by default",
+	Short: "Adds a new task to a specified project. Use --project flag or select interactively",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		display := NewCobraDisplay(cmd, args)
-		taskName := display.Prompt("Task name")
-		task, err := CreateTask(taskName)
+		projectName, _ := cmd.Flags().GetString("project")
+
+		// If no project flag, prompt for project with Inbox pre-filled
+		if projectName == "" {
+			projectName = display.PromptWithDefault("Project name", "Inbox")
+		}
+
+		taskName := display.PromptForTask(projectName)
+		task, err := CreateTaskInProject(taskName, projectName)
 		if err != nil {
 			display.Error(err.Error())
 			os.Exit(1)
@@ -49,6 +56,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&useGUI, "use-gui", "g", false, "Uses GUI instead of CLI")
 	listCmd.Flags().BoolVarP(&useGUI, "use-gui", "g", false, "Uses GUI instead of CLI")
 	addCmd.Flags().BoolVarP(&useGUI, "use-gui", "g", false, "Uses GUI instead of CLI")
+	addCmd.Flags().StringP("project", "p", "", "Project name to add task to")
 
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(addCmd)

@@ -36,8 +36,21 @@ After that you should be able to run it :)
 
 **Adding a new task**
 ```
+# Add to Inbox (default)
 ./main add "Some task"
 Task created! Id: ******
+
+# Add to a specific project
+./main add "Some task" --project "Work"
+Task created! Id: ******
+
+# Using GUI mode with project specified (single dialog)
+./main add -g --project "Work"
+# Opens task dialog labeled "Task name (Project: Work)"
+
+# Using GUI mode without project (prompts for project first)
+./main add -g
+# Opens "Project name" dialog with "Inbox" pre-filled, then task dialog
 ```
 
 **Listing pending tasks**
@@ -58,3 +71,8 @@ There's also the option to run in GUI-mode, by passing the `-g|--use-gui` flag.
 
 This is useful to reduce the steps necessary to create a task. You can use
 something like `sxhkd` to bind a hotkey to your `godoist -g add` command.
+
+**GUI Workflow:**
+- `./main add -g` - Single project input (pre-filled with "Inbox"), then task input
+- `./main add -g --project "Work"` - Skip project selection, go straight to task input with "Project: Work" label
+- Fast and keyboard-friendly - perfect for hotkey bindings

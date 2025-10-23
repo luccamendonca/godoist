@@ -27,6 +27,7 @@ type Task struct {
 type TaskRequest struct {
 	Content   string `json:"content,omitempty"`
 	DueString string `json:"due_string,omitempty"`
+	ProjectId int    `json:"project_id,omitempty"`
 }
 
 type Project struct {
@@ -84,6 +85,34 @@ func CreateTask(taskName string) (Task, error) {
 	taskRequest := TaskRequest{
 		Content:   taskName,
 		DueString: "today",
+	}
+	reqBodyBuf, err := json.Marshal(taskRequest)
+	var task Task
+	if err != nil {
+		return task, err
+	}
+	resp, err := makeRequest("POST", "/tasks", bytes.NewBuffer(reqBodyBuf))
+	if err != nil {
+		return task, err
+	}
+	err = unmarshalHttpResponse(resp, &task)
+	return task, err
+}
+
+func CreateTaskInProject(taskName string, projectName string) (Task, error) {
+	projects, err := FetchProjectsByName(projectName)
+	if err != nil {
+		return Task{}, err
+	}
+	if len(projects) == 0 {
+		return Task{}, fmt.Errorf("project '%s' not found", projectName)
+	}
+
+	project := projects[0]
+	taskRequest := TaskRequest{
+		Content:   taskName,
+		DueString: "today",
+		ProjectId: project.Id,
 	}
 	reqBodyBuf, err := json.Marshal(taskRequest)
 	var task Task
