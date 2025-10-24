@@ -12,7 +12,7 @@ import (
 type CobraDisplay interface {
 	Prompt(msg string) string
 	PromptWithDefault(msg string, defaultValue string) string
-	PromptForTask(projectName string) string
+	PromptForTask(projectName string) ParsedTask
 	Error(msg string)
 	Info(msg string)
 	Debug(any interface{})
@@ -42,11 +42,11 @@ func (cli DisplayCLI) Prompt(msg string) string {
 func (cli DisplayCLI) PromptWithDefault(msg string, defaultValue string) string {
 	return defaultValue
 }
-func (cli DisplayCLI) PromptForTask(projectName string) string {
+func (cli DisplayCLI) PromptForTask(projectName string) ParsedTask {
 	if len(cli.args) > 0 {
-		return cli.args[0]
+		return ParseTaskWithDate(cli.args[0])
 	}
-	return ""
+	return ParsedTask{Content: "", DueString: "today"}
 }
 func (cli DisplayCLI) Error(msg string) {
 	cli.Info(msg)
@@ -75,14 +75,23 @@ func (gui DisplayGUI) PromptWithDefault(msg string, defaultValue string) string 
 	}
 	return resp
 }
-func (gui DisplayGUI) PromptForTask(projectName string) string {
+func (gui DisplayGUI) PromptForTask(projectName string) ParsedTask {
 	msg := fmt.Sprintf("Task name (Project: %s)", projectName)
 	resp, err := zenity.Entry(msg)
 	if err != nil {
 		// User cancelled - exit silently
 		os.Exit(0)
 	}
-	return resp
+
+	parsed := ParseTaskWithDate(resp)
+
+	// Show confirmation of what was detected
+	// if parsed.DueString != "today" {
+	// 	confirmMsg := fmt.Sprintf("Creating task: '%s'\nDue: %s", parsed.Content, parsed.DueString)
+	// 	zenity.Info(confirmMsg, zenity.Title("Task Confirmation"))
+	// }
+
+	return parsed
 }
 func (gui DisplayGUI) Error(msg string) {
 	zenity.Error(msg)

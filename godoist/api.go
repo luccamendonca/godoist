@@ -6,8 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/olebedev/when"
+	"github.com/olebedev/when/rules/common"
+	"github.com/olebedev/when/rules/en"
 )
 
 type Task struct {
@@ -100,6 +105,10 @@ func CreateTask(taskName string) (Task, error) {
 }
 
 func CreateTaskInProject(taskName string, projectName string) (Task, error) {
+	return CreateTaskInProjectWithDue(taskName, projectName, "today")
+}
+
+func CreateTaskInProjectWithDue(taskName string, projectName string, dueString string) (Task, error) {
 	projects, err := FetchProjectsByName(projectName)
 	if err != nil {
 		return Task{}, err
@@ -111,7 +120,7 @@ func CreateTaskInProject(taskName string, projectName string) (Task, error) {
 	project := projects[0]
 	taskRequest := TaskRequest{
 		Content:   taskName,
-		DueString: "today",
+		DueString: dueString,
 		ProjectId: project.Id,
 	}
 	reqBodyBuf, err := json.Marshal(taskRequest)
@@ -149,6 +158,35 @@ func unmarshalHttpResponse(resp *http.Response, model interface{}) error {
 		return err
 	}
 	return nil
+}
+
+type ParsedTask struct {
+	Content   string
+	DueString string
+}
+
+func ParseTaskWithDate(input string) ParsedTask {
+	w := when.New(nil)
+	w.Add(en.All...)
+	w.Add(common.All...)
+
+	result, err := w.Parse(input, time.Now())
+	if err != nil || result == nil {
+		return ParsedTask{
+			Content:   strings.TrimSpace(input),
+			DueString: "today",
+		}
+	}
+
+	datePhrase := input[result.Index : result.Index+len(result.Text)]
+	cleanContent := strings.Replace(input, result.Text, "", 1)
+	cleanContent = strings.TrimSpace(cleanContent)
+	cleanContent = strings.Join(strings.Fields(cleanContent), " ")
+
+	return ParsedTask{
+		Content:   cleanContent,
+		DueString: datePhrase,
+	}
 }
 
 func makeRequest(method string, path string, reqBody *bytes.Buffer) (*http.Response, error) {

@@ -38,8 +38,8 @@ var addCmd = &cobra.Command{
 			projectName = display.PromptWithDefault("Project name", "Inbox")
 		}
 
-		taskName := display.PromptForTask(projectName)
-		_, err := CreateTaskInProject(taskName, projectName)
+		parsedTask := display.PromptForTask(projectName)
+		_, err := CreateTaskInProjectWithDue(parsedTask.Content, projectName, parsedTask.DueString)
 		if err != nil {
 			display.Error(err.Error())
 			os.Exit(1)

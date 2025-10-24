@@ -38,11 +38,9 @@ After that you should be able to run it :)
 ```
 # Add to Inbox (default)
 ./main add "Some task"
-Task created! Id: ******
 
 # Add to a specific project
 ./main add "Some task" --project "Work"
-Task created! Id: ******
 
 # Using GUI mode with project specified (single dialog)
 ./main add -g --project "Work"
@@ -51,6 +49,15 @@ Task created! Id: ******
 # Using GUI mode without project (prompts for project first)
 ./main add -g
 # Opens "Project name" dialog with "Inbox" pre-filled, then task dialog
+
+# Natural language date parsing
+./main add -g --project "Work"
+# Type: "Buy groceries tomorrow"
+# → Creates task "Buy groceries" due tomorrow
+# → Shows confirmation: "Creating task: 'Buy groceries', Due: tomorrow"
+
+./main add "Call dentist next Monday" --project "Personal"
+# → Creates task "Call dentist" due next Monday
 ```
 
 **Listing pending tasks**
@@ -76,3 +83,13 @@ something like `sxhkd` to bind a hotkey to your `godoist -g add` command.
 - `./main add -g` - Single project input (pre-filled with "Inbox"), then task input
 - `./main add -g --project "Work"` - Skip project selection, go straight to task input with "Project: Work" label
 - Fast and keyboard-friendly - perfect for hotkey bindings
+
+**Natural Language Date Parsing:**
+- Automatically detects dates in task names: "tomorrow", "next Friday", "in 3 days", etc.
+- Removes date phrases from task content and sets due date accordingly
+- Shows confirmation of detected dates in GUI mode
+- Falls back to "today" if no date is detected
+- Examples:
+  - "Buy milk tomorrow" → Task: "Buy milk", Due: tomorrow
+  - "Meeting with client next Tuesday at 2pm" → Task: "Meeting with client at 2pm", Due: next Tuesday
+  - "Review code in 2 days" → Task: "Review code", Due: in 2 days
