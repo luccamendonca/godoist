@@ -1,14 +1,26 @@
 package godoist
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/alecthomas/repr"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "godoist",
 	Short: "go and doist",
+}
+var parseDateCmd = &cobra.Command{
+	Use:   "parse",
+	Short: "check the date parser behavior",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("Args: %s\n", args)
+		parsedDate := ParseTaskWithDate(args[0])
+		repr.Println(parsedDate)
+	},
 }
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -59,6 +71,7 @@ func init() {
 
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(parseDateCmd)
 }
 
 func Execute() {

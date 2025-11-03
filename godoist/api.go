@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/olebedev/when"
+	"github.com/olebedev/when/rules"
 	"github.com/olebedev/when/rules/common"
 	"github.com/olebedev/when/rules/en"
 )
@@ -165,10 +167,27 @@ type ParsedTask struct {
 	DueString string
 }
 
+func getCustomWhenRules() []rules.Rule {
+	resp := []rules.Rule{}
+	resp = append(resp, &rules.F{
+		RegExp: regexp.MustCompile("(?i)" +
+			"(?:\\W|^)" +
+			"(?:\\s*(?:(every(.+other)?)))?" +
+			"(?:\\W|$)",
+		),
+		Applier: func(m *rules.Match, c *rules.Context, o *rules.Options, ref time.Time) (bool, error) {
+			return true, nil
+		},
+	})
+
+	return resp
+}
+
 func ParseTaskWithDate(input string) ParsedTask {
 	w := when.New(nil)
 	w.Add(en.All...)
 	w.Add(common.All...)
+	w.Add(getCustomWhenRules()...)
 
 	result, err := w.Parse(input, time.Now())
 	if err != nil || result == nil {
