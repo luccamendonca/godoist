@@ -172,7 +172,7 @@ func getCustomWhenRules() []rules.Rule {
 	resp = append(resp, &rules.F{
 		RegExp: regexp.MustCompile("(?i)" +
 			"(?:\\W|^)" +
-			"(?:\\s*(?:(every(.+other)?)))?" +
+			"(?:\\s*(?:(every(.+other)?(.+day)?)))?" +
 			"(?:\\W|$)",
 		),
 		Applier: func(m *rules.Match, c *rules.Context, o *rules.Options, ref time.Time) (bool, error) {
